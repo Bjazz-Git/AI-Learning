@@ -93,16 +93,23 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
     # TODO
-
     nodes = util.QueueFrontier()
     visited = []
     target_reached = False
 
-    # # Gets the starting layer
+    # If the source and target are the same end the program
+    if (source == target):
+        return visited
+
+    # Gets the starting layer (first connecting actors to source actor)
     pairs = neighbors_for_person(source)
     for pair in pairs:
         if pair[1] != source:
             nodes.add(Node(pair, None, 1))
+            # If target is in the first layer skip straight to the output
+            if pair[1] == target:
+                target_reached = True
+                break
 
     # Checks actors using Breath first search until the target actor is found or there is no link between the source and target actor
     while not target_reached:
@@ -113,7 +120,7 @@ def shortest_path(source, target):
         not_visited = True
         # Check if the parent has already been visited
         for node in visited:
-            if parent.state[0] == node.state[0] and parent.state[1] == node.state[1] :
+            if parent.state[0] == node.state[0] and parent.state[1] == node.state[1]:
                 not_visited = False
                 break
 
@@ -129,33 +136,35 @@ def shortest_path(source, target):
                         target_reached = True
                         break
 
-
     quickest_path = []
-    current_node = nodes.frontier[len(nodes.frontier) -1]
+    current_node = nodes.frontier[len(nodes.frontier) - 1]
     # Adds the target node to path
     quickest_path.append(current_node.state)
 
-    # Reverses starting from the target to find the quickest_path
-    while True:
-        parent_node = current_node.parent
+    # Reverses through the targets connecting pairs to find the quickest path
+    if current_node.parent is not None:
+        while True:
+            parent_node = current_node.parent
 
-        quickest_path.append(parent_node.state)
+            quickest_path.append(parent_node.state)
 
-        if parent_node.parent is None:
-            break
+            if parent_node.parent is None:
+                break
 
-        else:
-            current_node = parent_node
+            else:
+                current_node = parent_node
 
     quickest_path.reverse()
     return quickest_path
+
 
 def create_layer(source):
     layer = []
     pairs = neighbors_for_person(source)
     for pair in pairs:
         if pair[1] == source:
-            layer.append(pair)
+            layer.append(pair)    
+
 
 def person_id_for_name(name):
     """
