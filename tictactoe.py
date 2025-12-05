@@ -1,3 +1,5 @@
+import copy
+
 """
 Tic Tac Toe Player
 """
@@ -61,15 +63,23 @@ def actions(board):
 
 def result(board, action):
     # Return a copy of the board with the action being taken (shouldn't affect the actual board)
+    new_board = copy.deepcopy(board)
 
-    # If the action is not valid return an exception
-    raise NotImplementedError
+    # If the action can be taken return the board with the action taken
+    if new_board[action[0]][action[1]] == EMPTY:
+        new_board[action[0]][action[1]] = player(board)
+        return new_board
+    # Action is not valid, return an exception
+    else:
+        raise Exception 
 
 
 def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
+
+
     raise NotImplementedError
 
 
@@ -81,10 +91,16 @@ def terminal(board):
 
 
 def utility(board):
-    """
-    Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
-    """
-    raise NotImplementedError
+    # Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
+    winner = checkWinningCombinations(board, X, O)
+    if winner == X:
+        return 1
+    
+    elif winner == O:
+        return -1
+    
+    else:
+        return 0
 
 
 def minimax(board):
@@ -92,3 +108,96 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     raise NotImplementedError
+
+def checkWinningCombinations(board, player, opponent):
+    vertical_rows = [0, 0, 0]
+    player_score = 0
+    winner = ""
+
+    # Left Diagonal
+    for i in range(len(board)):
+        player_score += checkColumn(board, player, i, i)
+
+    # Check if someone won through a diagonal
+    winner = checkScore(player, opponent, player_score)
+    if (winner is not None):
+        return winner
+        
+    else:
+        player_score = 0
+    
+    # Right Diagonal
+    for i in range(len(board)):
+        player_score += checkColumn(board, player, i, (len(board) - 1) - i)
+
+    # Check if someone won through a diagonal
+    winner = checkScore(player, opponent, player_score)
+    if (winner is not None):
+        return winner
+        
+    else:
+        player_score = 0
+    
+    # Check Rows and Columns
+    for i in range(len(board)):
+        for j in range(len(board[i])):
+            # If Player's symbol is in cell increase the score
+            if board[i][j] == player:
+                player_score += 1
+                vertical_rows[j] += 1
+
+            # If Opponent's symbol is in cell decrease the score
+            elif board[i][j] == opponent:
+                player_score -= 1
+                vertical_rows[j] -= 1
+
+        # Check if someone won through rows
+        winner = checkScore(player, opponent, player_score)
+        if (winner is not None):
+            return winner
+        else:
+            player_score = 0
+
+    # Check if someone won through vertical rows
+    for row in vertical_rows:
+        winner = checkScore(player, opponent, row)
+        if (winner is not None):
+            return winner
+    
+    # If this line was reached then no one has won yet
+    return None
+        
+
+# Returns a number representing who has their symbol in a cell
+def checkColumn(board, player, row, column):
+    if (board[row][column] == player):
+        return 1
+
+    elif(board[row][column] != EMPTY):
+        return -1
+    
+    else:
+        return 0
+
+# Checks to see if someone has one for a specific combination    
+def checkScore(player, opponent, player_score):
+    if (player_score == 3):
+        return player
+    
+    elif (player_score == -3):
+        return opponent
+    
+    else:
+        return None
+
+
+
+
+        
+        
+
+
+
+            
+
+
